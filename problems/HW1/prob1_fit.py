@@ -27,7 +27,7 @@ Problem 1: Univariate Regression
 # meta-parameters for program
 alpha = 0.001 # step size coefficient
 eps = 0.0001 # controls convergence criterion
-n_epoch = 100 # number of epochs (full passes through the dataset)
+n_epoch = 10000 # number of epochs (full passes through the dataset)
 
 # begin simulation
 
@@ -56,7 +56,7 @@ def computeGrad(X, y, theta):
         np.multiply(
             np.repeat(diff, d, axis = 1),
             X), axis = 0)
-    dL_dw = np.array([dL_dw]).transpose() 
+    dL_dw = np.array([dL_dw]) 
     nabla = (dL_db, dL_dw)
     return nabla
 
@@ -75,10 +75,12 @@ y = data.iloc[:,cols-1:cols]
 X = np.array(X.values)  
 y = np.array(y.values)
 
-plt.scatter(X, y)
-plt.xlabel = "x"
-plt.ylabel = "y"
-plt.title = "food truch prediction"
+plt.scatter(X[:,0], y, s=30, label="Samples")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend(loc="best")
+plt.savefig(os.path.join("prob1", "data.png"))
+plt.show()
 
 # convert to numpy arrays and initalize the parameter array theta 
 w = np.zeros((1,X.shape[1]))
@@ -116,16 +118,22 @@ kludge = 0.25 # helps with printing the plots (you can tweak this value if you l
 X_test = np.linspace(data.X.min(), data.X.max(), 100)
 X_test = np.expand_dims(X_test, axis=1)
 
-plt.plot(X_test, regress(X_test, theta), label="Model")
-plt.scatter(X[:,0], y, edgecolor='g', s=20, label="Samples")
+plt.plot(X_test, regress(X_test, theta), color = 'r', label="Model")
+plt.scatter(X[:,0], y, s=30, label="Samples")
 plt.xlabel("x")
 plt.ylabel("y")
 plt.xlim((np.amin(X_test) - kludge, np.amax(X_test) + kludge))
 plt.ylim((np.amin(y) - kludge, np.amax(y) + kludge))
 plt.legend(loc="best")
-# WRITEME: write your code here to save plot to disk (look up documentation/inter-webs for matplotlib)
+plt.savefig(os.path.join("prob1", "fit.png"))
+plt.show()
 
 # visualize the loss as a function of passes through the dataset
-# WRITEME: write your code here create and save a plot of loss versus epoch
+plt.plot([i+1 for i in range(len(cost))], cost, label = "loss")
+plt.xlabel("epoch")
+plt.ylabel("loss")
+plt.savefig(os.path.join("prob1", "loss.png"))
+plt.show()
 
-plt.show() # convenience command to force plots to pop up on desktop
+
+

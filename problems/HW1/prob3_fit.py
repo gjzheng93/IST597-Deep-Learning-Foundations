@@ -27,42 +27,55 @@ Problem 3: Multivariate Regression & Classification
 # meta-parameters for program
 trial_name = 'p6_reg0' # will add a unique sub-string to output of this program
 degree = 6 # p, degree of model (LEAVE THIS FIXED TO p = 6 FOR THIS PROBLEM)
-beta = 0.0 # regularization coefficient
-alpha = 0 # step size coefficient
-n_epoch = 1 # number of epochs (full passes through the dataset)
-eps = 0.0 # controls convergence criterion
+beta = 100 # regularization coefficient
+alpha = 0.01 # step size coefficient
+n_epoch = 10000 # number of epochs (full passes through the dataset)
+eps = 1e-8 # controls convergence criterion
 
 # begin simulation
 
 def sigmoid(z):
-	# WRITEME: write your code here to complete the routine
-	return -1.0
+    
+    return 1/(1+np.exp(-z))
 
-def predict(X, theta):  
-	# WRITEME: write your code here to complete the routine
-	return 0.0
-	
 def regress(X, theta):
-	# WRITEME: write your code here to complete the routine
-	return -1.0
+    m = np.shape(X)[0]
+    b = theta[0]
+    w = theta[1]
+    y_hat = sigmoid(np.repeat(b[None,:], m, axis = 0) + np.dot(X, w.transpose()))
+    return y_hat
 
 def bernoulli_log_likelihood(p, y):
-	# WRITEME: write your code here to complete the routine
-	return -1.0
-	
-def computeCost(X, y, theta, beta): # loss is now Bernoulli cross-entropy/log likelihood
-	# WRITEME: write your code here to complete the routine
-	return -1.0
-	
+    # WRITEME: write your code here to complete the routine
+    return -1.0
+    
+def computeCost(X, y, theta, beta):
+    m = np.shape(y)[0]
+    y_hat = regress(X, theta)
+    w = theta[1]
+    loss = 1/(2*m)*np.sum(
+        np.multiply(-y, np.log(y_hat)) - np.multiply(1-y, np.log(1-y_hat))) \
+        + beta/(2*m)*np.sum(np.square(w))
+    return loss
+    
 def computeGrad(X, y, theta, beta): 
-	# WRITEME: write your code here to complete the routine (
-	# NOTE: you do not have to use the partial derivative symbols below, they are there to guide your thinking)
-	dL_dfy = None # derivative w.r.t. to model output units (fy)
-	dL_db = None # derivative w.r.t. model weights w
-	dL_dw = None # derivative w.r.t model bias b
-	nabla = (dL_db, dL_dw) # nabla represents the full gradient
-	return nabla
-	
+    m = y.shape[0]
+    d = X.shape[1]
+    diff = regress(X, theta) - y
+    dL_db = 1/m*np.sum(diff, axis = 0)
+    dL_dw = 1/m*np.sum(
+        np.multiply(
+            np.repeat(diff, d, axis = 1),
+            X), axis = 0)
+    dL_dw = np.array([dL_dw])
+    dL_dw = dL_dw + beta/m*w
+    nabla = (dL_db, dL_dw)
+    return nabla
+
+
+def predict(X, theta):  
+    return (regress(X, theta) > 0.5).astype(int)
+
 path = os.getcwd() + '/data/prob3.dat'  
 data2 = pd.read_csv(path, header=None, names=['Test 1', 'Test 2', 'Accepted'])
 
@@ -92,33 +105,40 @@ X2 = np.array(X2.values)
 y2 = np.array(y2.values)  
 w = np.zeros((1,X2.shape[1]))
 b = np.array([0])
-theta = (b, w)
+theta2 = (b, w)
 
 L = computeCost(X2, y2, theta2, beta)
 print("-1 L = {0}".format(L))
+L_best = L
 i = 0
+halt = 0
+cost = []
 while(i < n_epoch and halt == 0):
-	dL_db, dL_dw = computeGrad(X2, y2, theta, beta)
-	b = theta[0]
-	w = theta[1]
-	# update rules go here...
-	# WRITEME: write your code here to perform a step of gradient descent & record anything else desired for later
-
-	L = computeCost(X, y, theta, beta)
-	
-	# WRITEME: write code to perform a check for convergence (or simply to halt early)
-	
-	print(" {0} L = {1}".format(i,L))
-	i += 1
+    dL_db, dL_dw = computeGrad(X2, y2, theta2, beta)
+    b = theta2[0]
+    w = theta2[1]
+    b = b - alpha * dL_db
+    w = w - alpha * dL_dw
+    theta2 = (b, w)
+    L = computeCost(X2, y2, theta2, beta)
+    
+    print(" {0} L = {1}".format(i,L))
+    i += 1
+    
+    cost.append(L)
+    if abs(L-L_best) < eps:
+        halt = 1
+    L_best = min(L_best, L)
+    
 # print parameter values found after the search
 print("w = ",w)
 print("b = ",b)
 
 predictions = predict(X2, theta2)
 # compute error (100 - accuracy)
-err = 0.0
+err = 1 - np.sum(predictions == y2)/len(predictions)
 # WRITEME: write your code here calculate your actual classification error (using the "predictions" variable)
-print 'Error = {0}%'.format(err * 100.)
+print ('Error = {0}%'.format(err * 100.))
 
 
 # make contour plot
@@ -137,7 +157,7 @@ for i in range(1, degree+1):
 			grid_nl = feat
 probs = regress(grid_nl, theta2).reshape(xx.shape)
 
-f, ax = plt.subplots(figsize=(8, 6))
+f, ax = plt.subplots(figsize=(14, 10))
 ax.contour(xx, yy, probs, levels=[.5], cmap="Greys", vmin=0, vmax=.6)
 
 ax.scatter(x1, x2, c=y2, s=50,
@@ -147,6 +167,12 @@ ax.scatter(x1, x2, c=y2, s=50,
 ax.set(aspect="equal",
        xlim=(-1.5, 1.5), ylim=(-1.5, 1.5),
        xlabel="$X_1$", ylabel="$X_2$")
-# WRITEME: write your code here to save plot to disk (look up documentation/inter-webs for matplotlib)
-
+plt.savefig(os.path.join("prob3", str(degree) + '_' + str(beta) + "_db.png"))
 plt.show()
+
+plt.plot([i+1 for i in range(len(cost))], cost, label = "loss")
+plt.xlabel("epoch")
+plt.ylabel("loss")
+plt.savefig(os.path.join("prob3", str(degree) + '_' + str(beta) + "_loss.png"))
+plt.show()
+
