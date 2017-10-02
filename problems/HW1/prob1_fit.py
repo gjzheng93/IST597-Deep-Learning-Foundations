@@ -25,39 +25,46 @@ Problem 1: Univariate Regression
 
 # NOTE: you will need to tinker with the meta-parameters below yourself (do not think of them as defaults by any means)
 # meta-parameters for program
-alpha = 0.0 # step size coefficient
-eps = 0.00000 # controls convergence criterion
-n_epoch = 1 # number of epochs (full passes through the dataset)
+alpha = 0.001 # step size coefficient
+eps = 0.0001 # controls convergence criterion
+n_epoch = 100 # number of epochs (full passes through the dataset)
 
 # begin simulation
 
 def regress(X, theta):
-	# WRITEME: write your code here to complete the routine
-	return -1.0
+    m = np.shape(X)[0]
+    b = theta[0]
+    w = theta[1]
+    y_hat = np.repeat(b[None,:], m, axis = 0) + np.dot(X, w.transpose())
+    return y_hat
 
 def gaussian_log_likelihood(mu, y):
-	# WRITEME: write your code here to complete the sub-routine
 	return -1.0
 	
-def computeCost(X, y, theta): # loss is now Bernoulli cross-entropy/log likelihood
-	# WRITEME: write your code here to complete the routine
-	return -1.0
+def computeCost(X, y, theta):
+    m = np.shape(y)[0]
+    y_hat = regress(X, theta)
+    loss = 1/(2*m)*np.sum(np.square(y_hat - y))
+    return loss
 	
 def computeGrad(X, y, theta): 
-	# WRITEME: write your code here to complete the routine
-	# NOTE: you do not have to use the partial derivative symbols below, they are there to guide your thinking)
-	dL_dfy = None # derivative w.r.t. to model output units (fy)
-	dL_db = None # derivative w.r.t. model weights w
-	dL_dw = None # derivative w.r.t model bias b
-	nabla = (dL_db, dL_dw) # nabla represents the full gradient
-	return nabla
+    m = y.shape[0]
+    d = X.shape[1]
+    diff = regress(X, theta) - y
+    dL_db = 1/m*np.sum(diff, axis = 0)
+    dL_dw = 1/m*np.sum(
+        np.multiply(
+            np.repeat(diff, d, axis = 1),
+            X), axis = 0)
+    dL_dw = np.array([dL_dw]).transpose() 
+    nabla = (dL_db, dL_dw)
+    return nabla
 
 path = os.getcwd() + '/data/prob1.dat'  
 data = pd.read_csv(path, header=None, names=['X', 'Y']) 
 
 # display some information about the dataset itself here
-# WRITEME: write your code here to print out information/statistics about the data-set "data" using Pandas (consult the Pandas documentation to learn how)
-# WRITEME: write your code here to create a simple scatterplot of the dataset itself and print/save to disk the result
+data.describe()
 
 # set X (training data) and y (target variable)
 cols = data.shape[1]  
@@ -68,6 +75,11 @@ y = data.iloc[:,cols-1:cols]
 X = np.array(X.values)  
 y = np.array(y.values)
 
+plt.scatter(X, y)
+plt.xlabel = "x"
+plt.ylabel = "y"
+plt.title = "food truch prediction"
+
 # convert to numpy arrays and initalize the parameter array theta 
 w = np.zeros((1,X.shape[1]))
 b = np.array([0])
@@ -77,19 +89,24 @@ L = computeCost(X, y, theta)
 print("-1 L = {0}".format(L))
 L_best = L
 i = 0
-cost = [] # you can use this list variable to help you create the loss versus epoch plot at the end (if you want)
+cost = []
 while(i < n_epoch):
-	dL_db, dL_dw = computeGrad(X, y, theta)
-	b = theta[0]
-	w = theta[1]
-	# update rules go here...
-	# WRITEME: write your code here to perform a step of gradient descent & record anything else desired for later
-	
-	# (note: don't forget to override the theta variable...)
-	L = computeCost(X, y, theta) # track our loss after performing a single step
-	
-	print(" {0} L = {1}".format(i,L))
-	i += 1
+    dL_db, dL_dw = computeGrad(X, y, theta)
+    b = theta[0]
+    w = theta[1]
+    b = b - alpha * dL_db
+    w = w - alpha * dL_dw
+    theta = (b, w)
+    L = computeCost(X, y, theta)
+    print(" {0} L = {1}".format(i,L))
+    i += 1
+    
+    cost.append(L)
+    if abs(L-L_best) < eps:
+        break
+    L_best = min(L_best, L)
+    
+    
 # print parameter values found after the search
 print("w = ",w)
 print("b = ",b)
