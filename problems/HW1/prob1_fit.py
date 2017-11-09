@@ -25,8 +25,8 @@ Problem 1: Univariate Regression
 
 # NOTE: you will need to tinker with the meta-parameters below yourself (do not think of them as defaults by any means)
 # meta-parameters for program
-alpha = 0.001 # step size coefficient
-eps = 0.0001 # controls convergence criterion
+alpha = 0.1 # step size coefficient
+eps = 1e-8 # controls convergence criterion
 n_epoch = 10000 # number of epochs (full passes through the dataset)
 
 # begin simulation
@@ -104,8 +104,8 @@ while(i < n_epoch):
     i += 1
     
     cost.append(L)
-    if abs(L-L_best) < eps:
-        break
+#    if L_best-L < eps:
+#        break
     L_best = min(L_best, L)
     
     
@@ -125,14 +125,14 @@ plt.ylabel("y")
 plt.xlim((np.amin(X_test) - kludge, np.amax(X_test) + kludge))
 plt.ylim((np.amin(y) - kludge, np.amax(y) + kludge))
 plt.legend(loc="best")
-plt.savefig(os.path.join("prob1", "fit.png"))
+plt.savefig(os.path.join("prob1", str(alpha) + "_fit.png"))
 plt.show()
 
 # visualize the loss as a function of passes through the dataset
 plt.plot([i+1 for i in range(len(cost))], cost, label = "loss")
 plt.xlabel("epoch")
 plt.ylabel("loss")
-plt.savefig(os.path.join("prob1", "loss.png"))
+plt.savefig(os.path.join("prob1", str(alpha) + "_loss.png"))
 plt.show()
 
 

@@ -1,0 +1,3 @@
+code: "prob1_fit.py", "prob2_fit.py", "prob3_fit.py"
+plots: folders "prob1", "prob2", "prob3"
+report: "report.pdf"

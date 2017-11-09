@@ -1,0 +1,116 @@
+\section{Problem 2}
+
+\subsection{Fitting Result}
+
+With the parameter as $alpha = 0.001$, $eps = 10^{-8}$, 
+$n_{epoch} = 500000$, we can get the regression with the following results.
+
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_1_beta_0_loss.png}
+\centering 
+\caption{1st order}
+\label{fig:1st}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_3_beta_0_loss.png}
+\centering 
+\caption{3rd order}
+\label{fig:3rd}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_7_beta_0_loss.png}
+\centering 
+\caption{7th order}
+\label{fig:7th}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_11_beta_0_loss.png}
+\centering 
+\caption{11th order}
+\label{fig:11th}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_15_beta_0_loss.png}
+\centering 
+\caption{15th order}
+\label{fig:15th}
+\end{figure}
+
+
+\begin{itemize}
+\item With respect to the feature mapping, what is a potential problem that the scheme we have designed above might create?
+What is one solution to fixing any potential problems created by using this scheme (and what other problems might that solution induce)?
+
+The created features ($x$, $x^2$, $x^3$, ...) are highly correlated. In this way, the coefficient of each feature will highly depend on what features are included in the model. (i.e., including $x^2$ will have strong influence on the coefficient of $x$). This is not the correct relationship between $x$ and $y$ that we want to model.
+
+One possible solution is to just feed one $x$ input into the computation graph, and make the $x$, $x^2$, $x^3$ as a hidden layer. Then, when computing the gradient, the change in $x$ will cause the change in all the hidden layers.
+
+\item What do you observe as the capacity of the model is increased? Why does this happen? 
+
+As the capacity of the model increase, the model is able to fit the data better (the loss is decreasing). This is due to the reason that higher order polynomial can fit more details than lower order polynomial. If we push the order to infinity, this will become taylor series, which is able to fit any function form.
+
+\end{itemize}
+
+\subsection{Tuning the regularization}
+
+
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_15_beta_0_loss.png}
+\centering 
+\caption{\protect 15th order, $\beta = 0$}
+\label{fig:15th}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_15_beta_0_001_loss.png}
+\centering 
+\caption{\protect 15th order, $\beta = 0.001$}
+\label{fig:15th}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_15_beta_0_01_loss.png}
+\centering 
+\caption{\protect 15th order, $\beta = 0.01$}
+\label{fig:15th}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_15_beta_0_1_loss.png}
+\centering 
+\caption{\protect 15th order, $\beta = 0.1$}
+\label{fig:15th}
+\end{figure}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.85\textwidth]{fig/prob2/degree_15_beta_1_loss.png}
+\centering 
+\caption{\protect 15th order, $\beta = 1$}
+\label{fig:15th}
+\end{figure}
+
+\begin{itemize}
+\item What do you observe as you
+increase the value of $\beta$? How does this interact with the general model fitting process (such as the step
+size $\alpha$ and number of epochs needed to reach convergence)?
+
+As $\beta$ increase, the model tends to be more general (have less detailed information). The general model fitting process becomes faster and will converge with fewer epochs. 
+
+\item What might be a problem with a convergence check that compares the current cost with the previous cost (i.e., looks at the deltas between costs at time t and t − 1), especially for a more complicated model? How can we fix this?
+
+\textbf{I already added this convergence check in the code.} If the function is not convex everywhere, then this convergence check might lead to a local optimum if the step size is not very big. Because the optimizer might get trapped in the local optimum for several epochs. We can wait for several epochs. Within these several epochs, if the loss decrease is always smaller than a threshold value, we stop the optimiation.
+  
+\end{itemize}
+
+
+
+
+
+
+
