@@ -18,7 +18,7 @@ Problem 1a: Softmax Regression \& the XOR Problem
 def calPK(X, W, b):
 	
 	N = len(X)
-	fk = np.dot(X, W) + np.repeat(b, [N], axis=  0) # 1*N
+	fk = np.dot(X, W) + np.repeat(b, [N], axis=  0) # N*k
 	efk = np.exp(fk)
 	pk = np.divide(efk, np.sum(efk, axis = 1)[:,None])
 	
@@ -161,7 +161,7 @@ def main():
 	n_e = 1000
 	check = 10 # every so many pass/epochs, print loss/error to terminal
 	step_size = 1e-1
-	reg = 0.0 # regularization strength
+	reg = 0.1 # regularization strength
 	
 	# gradient descent loop
 	num_examples = X.shape[0]
@@ -172,9 +172,6 @@ def main():
 		theta = updateTheta(theta, theta_grad, step_size)
 		if i % check == 0:
 			print ("iteration %d: loss %f" % (i, loss))
-	
-		# perform a parameter update
-		# WRITEME: write your update rule(s) here
 	 
 	# TODO: remove this line below once you have correctly implemented/gradient-checked your various sub-routines
 # 	sys.exit(0) 
