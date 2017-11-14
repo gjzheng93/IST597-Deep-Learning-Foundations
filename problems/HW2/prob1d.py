@@ -12,7 +12,8 @@ plt.rcParams['image.cmap'] = 'gray'
 '''
 Problem 1d: MLPs \& the Spiral Problem
 
-@author - Alexander G. Ororbia II
+@author - Guanjie Zheng
+@author - Alexander G. Ororbia II (template provider)
 '''
 
 def calHpre(X, W1, b1):

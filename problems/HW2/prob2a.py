@@ -13,7 +13,8 @@ plt.rcParams['image.cmap'] = 'gray'
 '''
 Problem 2a: 1-Layer MLP for IRIS
 
-@author - Alexander G. Ororbia II
+@author - Guanjie Zheng
+@author - Alexander G. Ororbia II (template provider)
 '''
 
 
@@ -206,6 +207,10 @@ def main():
 	
 	train_cost = []
 	valid_cost = []
+	
+	min_loss_v = None
+	patience = 0
+	
 	# gradient descent loop
 	num_examples = X.shape[0]
 	for i in range(n_e):
@@ -227,7 +232,27 @@ def main():
 			
 		if i % check == 0:
 			print ("iteration %d: loss %f" % (i, loss))
-			###### get train loss and validation loss and check ######
+			loss_t = computeCost(X, y, theta, reg)
+			train_cost.append(loss_t)
+			loss_v = computeCost(X_v, y_v, theta, reg)
+			valid_cost.append(loss_v)
+			
+			print ("training loss: {0:.4f}", loss_t)
+			print ("validation loss: {0:.4f}", loss_v)
+			
+			if min_loss_v == None:
+				min_loss_v = loss_v
+			else:
+				min_loss_v = min(min_loss_v, loss_v)	
+			
+			if loss_v > min_loss_v:
+				patience += 1
+			else:
+				patience = 0
+			
+			if patience > 10:
+				print ("early stop")
+				break
 			
 	
 	print(' > Training loop completed!')

@@ -12,7 +12,8 @@ plt.rcParams['image.cmap'] = 'gray'
 '''
 Problem 1a: Softmax Regression \& the XOR Problem
 
-@author - Alexander G. Ororbia II
+@author - Guanjie Zheng
+@author - Alexander G. Ororbia II (template provider)
 '''
 
 def calPK(X, W, b):

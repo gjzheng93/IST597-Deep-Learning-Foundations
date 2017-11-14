@@ -11,7 +11,8 @@ plt.rcParams['image.cmap'] = 'gray'
 '''
 Problem 1b: Softmax Regression \& the Spiral Problem
 
-@author - Alexander G. Ororbia II
+@author - Guanjie Zheng
+@author - Alexander G. Ororbia II (template provider)
 '''		
 	
 
