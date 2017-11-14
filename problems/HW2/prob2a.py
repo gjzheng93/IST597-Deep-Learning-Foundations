@@ -158,7 +158,7 @@ def shuffle(X,y):
 	y_rand = y_rand.reshape(y_rand.shape[1:])
 	return (X_rand,y_rand)
 
-def main():
+def main(step_size, reg, h, f):
 	np.random.seed(0)
 	# Load in the data from disk
 	path = os.getcwd() + '/data/iris_train.dat'  
@@ -191,7 +191,7 @@ def main():
 	K = np.amax(y) + 1
 	
 	# initialize parameters randomly
-	h = 100 # size of hidden layer
+# 	h = 100 # size of hidden layer
 	W1 = 0.01 * np.random.randn(D,h)
 	b1 = np.zeros((1,h))
 	W2 = 0.01 * np.random.randn(h,K)
@@ -202,11 +202,12 @@ def main():
 	n_e = 10000
 	n_b = 10
 	check = 10
-	step_size = 0.01 #1e-0
-	reg = 0.001 #1e-3 # regularization strength
+# 	step_size = 0.01 #1e-0
+# 	reg = 0.001 #1e-3 # regularization strength
 	
 	train_cost = []
 	valid_cost = []
+	cnt_epoch = []
 	
 	min_loss_v = None
 	patience = 0
@@ -236,6 +237,7 @@ def main():
 			train_cost.append(loss_t)
 			loss_v = computeCost(X_v, y_v, theta, reg)
 			valid_cost.append(loss_v)
+			cnt_epoch.append(i)
 			
 			print ("training loss: {0:.4f}", loss_t)
 			print ("validation loss: {0:.4f}", loss_v)
@@ -250,7 +252,7 @@ def main():
 			else:
 				patience = 0
 			
-			if patience > 10:
+			if patience > 10000:
 				print ("early stop")
 				break
 			
@@ -261,13 +263,36 @@ def main():
 	
 	scores = predict(X,theta)
 	predicted_class = np.argmax(scores, axis=1)
-	print('training accuracy: {0}'.format(np.mean(predicted_class == y)))
+	train_acc = np.mean(predicted_class == y)
 	
 	scores = predict(X_v,theta)
 	predicted_class = np.argmax(scores, axis=1)
-	print('validation accuracy: {0}'.format(np.mean(predicted_class == y_v)))
+	valid_acc = np.mean(predicted_class == y_v)
+	
+	f.write("{0},{1},{2},{3:.2f},{4:.2f}\n".format(step_size, reg, h, train_acc, valid_acc))
+	
+	
+	fig = plt.figure()
+	plt.plot(cnt_epoch, train_cost)
+	plt.xlabel("epoch")
+	plt.ylabel("training loss")
+	plt.title("step size={0}, reg={1}, h={2}".format(step_size,reg,h))
+	fig.savefig(os.path.join("out", "prob2a", 'training_loss_{0}_{1}_{2}.png'.format(step_size, reg, h)))
+	
+	fig = plt.figure()
+	plt.plot(cnt_epoch, valid_cost)
+	plt.xlabel("epoch")
+	plt.ylabel("validation loss")
+	plt.title("step size={0}, reg={1}, h={2}".format(step_size,reg,h))
+	fig.savefig(os.path.join("out", "prob2a", 'validation_loss_{0}_{1}_{2}.png'.format(step_size, reg, h)))
 	
 	# NOTE: write your plot generation code here (for example, using the "train_cost" and "valid_cost" list variables)
 	
-main()
+f = open(os.path.join("out", "prob2a", "result"), "w")
+f.write("step_size,reg,h,train_acc,validation_acc\n")
+for step_size in [1e-2]:
+	for reg in [ 0.001]:
+		for h in [100]:
+			main(step_size, reg, h, f)
+f.close()
 	

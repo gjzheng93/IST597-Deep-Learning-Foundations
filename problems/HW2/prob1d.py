@@ -142,7 +142,7 @@ def updateTheta(theta, theta_grad, step_size):
 		
 	return theta
 
-def main():
+def main(step_size, reg, h, f):
 	
 	np.random.seed(0)
 	# Load in the data from disk
@@ -164,7 +164,7 @@ def main():
 	K = np.amax(y) + 1
 	
 	# initialize parameters randomly
-	h = 100 # size of hidden layer
+# 	h = 100 # size of hidden layer
 	W1 = 0.01 * np.random.randn(D,h)
 	b1 = np.zeros((1,h))
 	W2 = 0.01 * np.random.randn(h,K)
@@ -172,10 +172,13 @@ def main():
 	theta = [W1,b1,W2,b2]
 	
 	# some hyperparameters
-	n_e = 20000
+	n_e = 30000
 	check = 10 # every so many pass/epochs, print loss/error to terminal
-	step_size = 1e-1
-	reg = 1e-3 # regularization strength
+# 	step_size = 1e-1
+# 	reg = 1e-3 # regularization strength
+	
+	list_loss = []
+	cnt_epoch = []
 	
 	# gradient descent loop
 	for i in range(n_e):
@@ -184,6 +187,8 @@ def main():
 		theta = updateTheta(theta, theta_grad, step_size)
 		if i % check == 0:
 			print ("iteration %d: loss %f" % (i, loss))
+			cnt_epoch.append(i)
+			list_loss.append(loss)
 
 	# TODO: remove this line below once you have correctly implemented/gradient-checked your various sub-routines
 # 	sys.exit(0) 
@@ -191,14 +196,17 @@ def main():
 	
 	scores = predict(X,theta)
 	predicted_class = np.argmax(scores, axis=1)
-	print ('training accuracy: %.2f' % (np.mean(predicted_class == y)))
+	acc = np.mean(predicted_class == y)
+	print ('training accuracy: %.2f' % acc)
+	
+	f.write("{0},{1},{2},{3:.2f}\n".format(step_size, reg, h, acc))
 	
 	# plot the resulting classifier
-	h = 0.02
+	hhh = 0.02
 	x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
 	y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-	xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-	                     np.arange(y_min, y_max, h))
+	xx, yy = np.meshgrid(np.arange(x_min, x_max, hhh),
+	                     np.arange(y_min, y_max, hhh))
 						 
 	Z = predict(np.c_[xx.ravel(), yy.ravel()], theta)
 	
@@ -209,10 +217,23 @@ def main():
 	plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
 	plt.xlim(xx.min(), xx.max())
 	plt.ylim(yy.min(), yy.max())
-	#fig.savefig('spiral_net.png')
+	plt.title("step size={0}, reg={1}, h={2}".format(step_size,reg,h))
+	fig.savefig(os.path.join("out", "prob1d", 'decision_boundary_{0}_{1}_{2}.png'.format(step_size, reg, h)))
 	
-	plt.show()
 	
-main()
+	fig = plt.figure()
+	plt.plot(cnt_epoch, list_loss)
+	plt.xlabel("epoch")
+	plt.ylabel("training loss")
+	plt.title("step size={0}, reg={1}, h={2}".format(step_size,reg,h))
+	fig.savefig(os.path.join("out", "prob1d", 'loss_{0}_{1}_{2}.png'.format(step_size, reg, h)))
+	
+f = open(os.path.join("out", "prob1d", "result"), "w")
+f.write("step_size,reg,h,acc\n")
+for step_size in [1e-1]:
+	for reg in [0.001]:
+		for h in [100]:
+			main(step_size, reg, h, f)
+f.close()
 	
 	

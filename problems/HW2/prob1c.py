@@ -143,7 +143,7 @@ def updateTheta(theta, theta_grad, step_size):
 		
 	return theta
 
-def main():
+def main(step_size, reg, h, f):
 	
 	np.random.seed(0)
 	# Load in the data from disk
@@ -165,15 +165,11 @@ def main():
 	K = np.amax(y) + 1
 	
 	# initialize parameters in such a way to play nicely with the gradient-check! 
-	h = 6 #100 # size of hidden layer
 	W1 = 0.05 * np.random.randn(D,h) #0.01 * np.random.randn(D,h)
 	b1 = np.zeros((1,h)) + 1.0
 	W2 = 0.05 * np.random.randn(h,K) #0.01 * np.random.randn(h,K)
 	b2 = np.zeros((1,K)) + 1.0
 	theta = [W1,b1,W2,b2] 
-	
-	# some hyperparameters
-	reg = 1e-3 # regularization strength
 	
 	nabla_n = computeNumGrad(X,y,theta,reg)
 	nabla = computeGrad(X,y,theta,reg)
@@ -191,7 +187,7 @@ def main():
 			print("Param {0} is CORRECT, error = {1}".format(jj, err))
 	
 	# re-init parameters
-	h = 100 #100 # size of hidden layer
+	 #100 # size of hidden layer
 	W1 = 0.01 * np.random.randn(D,h)
 	b1 = np.zeros((1,h))
 	W2 = 0.01 * np.random.randn(h,K)
@@ -201,8 +197,9 @@ def main():
 	# some hyperparameters
 	n_e = 10000
 	check = 10 # every so many pass/epochs, print loss/error to terminal
-	step_size = 1e-1
-	reg = 0.1 # regularization strength
+	
+	list_loss = []
+	cnt_epoch = []
 		
 	# gradient descent loop
 	for i in range(n_e):
@@ -212,16 +209,31 @@ def main():
 		theta = updateTheta(theta, theta_grad, step_size)
 		if i % check == 0:
 			print ("iteration %d: loss %f" % (i, loss))
-	
-		# perform a parameter update
-		# WRITEME: write your update rule(s) here
+			cnt_epoch.append(i)
+			list_loss.append(loss)
 	 
 	# TODO: remove this line below once you have correctly implemented/gradient-checked your various sub-routines
 # 	sys.exit(0) 
 	
 	scores = predict(X,theta)
 	predicted_class = np.argmax(scores, axis=1)
-	print ('training accuracy: %.2f' % (np.mean(predicted_class == y)))
+	acc = np.mean(predicted_class == y)
+	print ('training accuracy: %.2f' % acc)
+	
+	f.write("{0},{1},{2},{3:.2f}\n".format(step_size, reg, h, acc))
+	
+	fig = plt.figure()
+	plt.plot(cnt_epoch, list_loss)
+	plt.xlabel("epoch")
+	plt.ylabel("training loss")
+	plt.title("step size={0}, reg={1}, h={2}".format(step_size,reg,h))
+	fig.savefig(os.path.join("out", "prob1c", 'loss_{0}_{1}_{2}.png'.format(step_size, reg, h)))
 
-main()
+f = open(os.path.join("out", "prob1c", "result"), "w")
+f.write("step_size,reg,h,acc\n")
+for step_size in [1e-3, 1e-2, 1e-1]:
+	for reg in [0.001, 0.01, 0.1]:
+		for h in [10, 50, 100]:
+			main(step_size, reg, h, f)
+f.close()
 	

@@ -109,7 +109,7 @@ def updateTheta(theta, theta_grad, step_size):
 	return theta
 
 
-def main():
+def main(step_size, reg, f):
 
 	np.random.seed(0)
 	# Load in the data from disk
@@ -140,8 +140,6 @@ def main():
 	# some hyperparameters
 	n_e = 1000
 	check = 10 # every so many pass/epochs, print loss/error to terminal
-	step_size = 1e-2
-	reg = 0.1 # regularization strength
 	
 	# gradient descent loop
 	for i in range(n_e):
@@ -159,7 +157,10 @@ def main():
 	scores = predict(X,theta)
 	#scores = np.dot(X, W) + b
 	predicted_class = np.argmax(scores, axis=1)
-	print ('training accuracy: %.2f' % (np.mean(predicted_class == y)))
+	acc = np.mean(predicted_class == y)
+	print ('training accuracy: %.2f' % acc)
+	
+	f.write("{0},{1},{2:.2f}\n".format(step_size, reg, acc))
 	
 	# plot the resulting classifier
 	h = 0.02
@@ -175,9 +176,13 @@ def main():
 	plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
 	plt.xlim(xx.min(), xx.max())
 	plt.ylim(yy.min(), yy.max())
-	#fig.savefig('spiral_linear.png')
+	fig.savefig(os.path.join("out", "prob1b", 'spiral_linear_{0}_{1}.png'.format(step_size, reg)))
 	
-	plt.show()
+# 	plt.show()
 	
-main()
-
+f = open(os.path.join("out", "prob1b", "result"), "w")
+f.write("step_size,reg,acc\n")
+for step_size in [1e-3, 1e-2, 1e-1]:
+	for reg in [0.001, 0.01, 0.1]:
+		main(step_size, reg, f)
+f.close()

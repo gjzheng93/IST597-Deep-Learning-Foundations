@@ -108,7 +108,7 @@ def updateTheta(theta, theta_grad, step_size):
 		
 	return theta
 
-def main():
+def main(step_size, reg, f):
 
 	np.random.seed(0)
 	# Load in the data from disk
@@ -136,8 +136,6 @@ def main():
 	b = np.zeros((1,K)) + 1.0
 	theta = [W,b]
 	
-	# some hyperparameters
-	reg = 1e-3 # regularization strength
 	
 	nabla_n = computeNumGrad(X,y,theta,reg)
 	nabla = computeGrad(X,y,theta,reg)
@@ -159,10 +157,9 @@ def main():
 	b = np.zeros((1,K))
 	theta = [W,b]
 	
-	n_e = 1000
+	n_e = 10000
 	check = 10 # every so many pass/epochs, print loss/error to terminal
-	step_size = 1e-1
-	reg = 0.1 # regularization strength
+
 	
 	# gradient descent loop
 	num_examples = X.shape[0]
@@ -181,7 +178,16 @@ def main():
 	scores = predict(X,theta)
 	#scores = np.dot(X, W) + b
 	predicted_class = np.argmax(scores, axis=1)
-	print ('training accuracy: %.2f' % (np.mean(predicted_class == y)))
+	acc = np.mean(predicted_class == y)
+	print ('training accuracy: %.2f' % acc)
 	
-main()
+	f.write("{0},{1},{2:.2f}\n".format(step_size, reg, acc))
+	
+
+f = open(os.path.join("out", "prob1a", "result"), "w")
+f.write("step_size,reg,acc\n")
+for step_size in [1e-3, 1e-2, 1e-1]:
+	for reg in [0.001, 0.01, 0.1]:
+		main(step_size, reg, f)
+f.close()
 
